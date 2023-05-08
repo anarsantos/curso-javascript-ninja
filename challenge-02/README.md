@@ -31,7 +31,7 @@ function dois() {
 dois();
 
 // Qual o retorno da função? (Use comentários de bloco).
-2
+//O valor da variável é 2
 
 /*
 Crie uma função com as seguintes características:
