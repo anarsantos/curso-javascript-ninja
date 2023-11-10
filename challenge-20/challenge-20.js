@@ -31,7 +31,7 @@
     - Selecione o input de "Nome", atribuindo-o à uma variável chamada
     `$inputUsername`.
     */
-    var $inputUsername = document.querySelector('input[type="text]');//seletor CSS
+    var $inputUsername = document.querySelector('input[type="text"]');//seletor CSS
 
     /*
     - Selecione o input de "Email", atribuindo-o à uma variável chamada
@@ -82,7 +82,20 @@
     Caso contrário, mostre um alerta com a mensagem:
         - "Não enviado."
     */
-    // ?
+    $button.addEventListener('click', function(event) { //listener de evento de click
+        event.preventDefault(); //sem preventDefault o formulário continua sendo enviado
+        if(!$inputUsername.value)
+            return alert('Preencha o nome do usuário!');
+        if(!$inputEmail.value)
+            return alert('Preencha o e-mail!');
+        if(!isValidEmail($inputEmail.value))
+            return alert('Entre com um e-mail válido!');
+        if(!$message.value)
+            return alert('Preencha a mensagem!');
+        if(!confirm('Tem certeza que deseja enviar o formulário?'))
+            return alert('Não enviado.');
+        return alert('Enviado com sucesso!');
+    }, false);
 
     /*
     Crie uma função chamada `isValidEmail`, que será usada na validação do
@@ -97,7 +110,7 @@
         - Para a extensão, o domínio deve vir seguido de um ponto, e no mínimo
         2 caracteres alfanuméricos;
         - O final do domínio é opcional, mas se existir, deve começar com um
-        ponto, seguido de no máximo 2 caracteres alfanuméricos.
+        ponto, seguido de no máximo 2 caracteres alfanuméricos. (?:\.\w{2})?$ (a interrogação diz que é opcional - ?: faz agrupamento, mas não faz a captura)
     
     Alguns e-mails válidos que podem ser usados para testar:
         - "meu.email+categoria@gmail.com"
@@ -110,5 +123,7 @@
         - "rita-marica@titica.a.b"
         - "agua_@evida.br.com"
     */
-    // ?
+    function isValidEmail(email) {
+        return /^[\w+.]+@\w+\.\w{2,}(?:\.\w{2})?$/.test(email);
+    }
 })(window, document);
