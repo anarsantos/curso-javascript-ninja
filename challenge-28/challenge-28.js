@@ -1,4 +1,4 @@
-(function () {
+(function (DOM) {
   'use strict';
   /*
     No HTML:
@@ -27,175 +27,103 @@
     - Utilize a lib DOM criada anteriormente para facilitar a manipulação e
     adicionar as informações em tela.
     */
-  function DOM(elements) {
-    this.element = document.querySelectorAll(elements);
-  }
 
-  DOM.prototype.on = function on(eventType, callback) {
-    Array.prototype.forEach.call(this.element, function (element) {
-      element.addEventListener(eventType, callback, false);
-    });
-  };
+  function app() {
+    var $formCEP = new DOM('[data-js="form-cep"]');
+    var $inputCEP = new DOM('[data-js="input-cep"]');
+    var $logradouro = new DOM('[data-js="logradouro"]');
+    var $bairro = new DOM('[data-js="bairro"]');
+    var $estado = new DOM('[data-js="estado"]');
+    var $cidade = new DOM('[data-js="cidade"]');
+    var $cep = new DOM('[data-js="cep"]');
+    var $status = new DOM('[data-js="status"]');
+    var ajax = new XMLHttpRequest();
+    $formCEP.on('submit', handleSubmitFormCEP); //função callback
 
-  DOM.prototype.off = function off(eventType, callback) {
-    Array.prototype.forEach.call(this.element, function (element) {
-      element.removeEventListener(eventType, callback, false);
-    });
-  };
-
-  DOM.prototype.get = function get() {
-    return this.element;
-  };
-
-  //forEach, map, filter, reduce, reduceRight, every e some.
-  DOM.prototype.forEach = function forEach() {
-    return Array.prototype.forEach.apply(this.element, arguments);
-  };
-
-  DOM.prototype.map = function map() {
-    return Array.prototype.map.apply(this.element, arguments);
-  };
-
-  DOM.prototype.filter = function filter() {
-    return Array.prototype.filter.apply(this.element, arguments);
-  };
-
-  DOM.prototype.reduce = function reduce() {
-    return Array.prototype.reduce.apply(this.element, arguments);
-  };
-
-  DOM.prototype.reduceRight = function reduceRight() {
-    return Array.prototype.reduceRight.apply(this.element, arguments);
-  };
-
-  DOM.prototype.every = function every() {
-    return Array.prototype.every.apply(this.element, arguments);
-  };
-
-  DOM.prototype.some = function some() {
-    return Array.prototype.some.apply(this.element, arguments);
-  };
-
-  //isArray, isObject, isFunction, isNumber, isString, isBoolean, isNull.
-  DOM.prototype.isArray = function isArray(param) {
-    return Object.prototype.toString.call(param) === '[object Array]';
-  };
-
-  DOM.prototype.isObject = function isObject(param) {
-    return Object.prototype.toString.call(param) === '[object Object]';
-  };
-
-  DOM.prototype.isFunction = function isFunction(param) {
-    return Object.prototype.toString.call(param) === '[object Function]';
-  };
-
-  DOM.prototype.isNumber = function isNumber(param) {
-    return Object.prototype.toString.call(param) === '[object Number]';
-  };
-
-  DOM.prototype.isString = function isString(param) {
-    return Object.prototype.toString.call(param) === '[object String]';
-  };
-
-  DOM.prototype.isBoolean = function isBoolean(param) {
-    return Object.prototype.toString.call(param) === '[object Boolean]';
-  };
-
-  DOM.prototype.isNull = function isNull(param) {
-    return Object.prototype.toString.call(param) === '[object Null]' || Object.prototype.toString.call(param) === '[object undefined]';
-  };
-
-  var $formCEP = new DOM('[data-js="form-cep"]');
-  var $inputCEP = new DOM('[data-js="input-cep"]');
-  var $logradouro = new DOM('[data-js="logradouro"]');
-  var $bairro = new DOM('[data-js="bairro"]');
-  var $estado = new DOM('[data-js="estado"]');
-  var $cidade = new DOM('[data-js="cidade"]');
-  var $cep = new DOM('[data-js="cep"]');
-  var $status = new DOM('[data-js="status"]');
-  var ajax = new XMLHttpRequest();
-  $formCEP.on('submit', handleSubmitFormCEP); //função callback
-
-  function handleSubmitFormCEP(event) {
-    event.preventDefault();
-    var url = getUrl();
-    ajax.open('GET', url, true);
-    ajax.send();
-    getMessage('loading');
-    ajax.addEventListener('readystatechange', handleReadyStateChange);
-  }
-
-  function getUrl() {
-    return replaceCEP('https://viacep.com.br/ws/[CEP]/json/');
-  }
-
-  function clearCEP() {
-    return $inputCEP.get()[0].value.replace(/\D+/g, '');//o que não for n° vai trocar por string em branco
-  }
-
-  function handleReadyStateChange() {
-    if (isRequestOk()) {
-      getMessage('ok');
-      fillCEPFields();//função para preencher os dados da request
+    function handleSubmitFormCEP(event) {
+      event.preventDefault();
+      var url = getUrl();
+      ajax.open('GET', url, true);
+      ajax.send();
+      getMessage('loading');
+      ajax.addEventListener('readystatechange', handleReadyStateChange);
     }
 
-    if(isCepInvalid) {
-      getMessage('error');
+    function getUrl() {
+      return replaceCEP('https://viacep.com.br/ws/[CEP]/json/');
+    }
+
+    function clearCEP() {
+      return $inputCEP.get()[0].value.replace(/\D+/g, '');//o que não for n° vai trocar por string em branco
+    }
+
+    function handleReadyStateChange() {
+      if (isRequestOk()) {
+        getMessage('ok');
+        fillCEPFields();//função para preencher os dados da request
+      }
+
+      if (isCepInvalid) {
+        getMessage('error');
+      }
+    }
+
+    function isRequestOk() {
+      return ajax.readyState === 4 && ajax.status === 200;
+    }
+
+    function isCepInvalid() {
+      return ajax.readyState === 4 && ajax.status === 0;
+    }
+
+    function fillCEPFields() {
+      var data = parseData();
+      if (!data) {
+        getMessage('error');
+        data = clearData();
+      }
+
+      $logradouro.get()[0].textContent = data.logradouro;
+      $bairro.get()[0].textContent = data.bairro;
+      $estado.get()[0].textContent = data.uf;
+      $cidade.get()[0].textContent = data.localidade;
+      $cep.get()[0].textContent = data.cep;
+    }
+
+    function clearData() {
+      return {
+        logradouro: '-',
+        bairro: '-',
+        uf: '-',
+        localidade: '-',
+        cep: '-'
+      };
+    }
+
+    function parseData() {
+      var result = JSON.parse(ajax.responseText);
+      return result.erro ? null : result;
+    }
+
+    function getMessage(type) {
+      var messages = {
+        loading: 'Buscando informações para o CEP [CEP]...',
+        ok: 'Endereço referente ao CEP [CEP]:',
+        error: 'Não encontramos o endereço para o CEP [CEP].'
+      };
+      $status.get()[0].textContent = replaceCEP(messages[type]);
+      /*return { //outra forma de fazer
+        loading: 'Buscando informações para o CEP [CEP]...',
+        ok: 'Endereço referente ao CEP [CEP]:',
+        error: 'Não encontramos o endereço para o CEP [CEP].'
+      }[type];*/
+    }
+
+    function replaceCEP(message) {
+      return message.replace('[CEP]', clearCEP());
     }
   }
 
-  function isRequestOk() {
-    return ajax.readyState === 4 && ajax.status === 200;
-  }
+  app();
 
-  function isCepInvalid() {
-    return ajax.readyState === 4 && ajax.status === 0;
-  }
-
-  function fillCEPFields() {
-    var data = parseData();
-    if (!data) {
-      getMessage('error');
-      data = clearData();
-    }
-
-    $logradouro.get()[0].textContent = data.logradouro;
-    $bairro.get()[0].textContent = data.bairro;
-    $estado.get()[0].textContent = data.uf;
-    $cidade.get()[0].textContent = data.localidade;
-    $cep.get()[0].textContent = data.cep;
-  }
-
-  function clearData() {
-    return {
-      logradouro: '-',
-      bairro: '-',
-      uf: '-',
-      localidade: '-',
-      cep: '-'
-    };
-  }
-
-  function parseData() {
-    var result = JSON.parse(ajax.responseText);
-    return result.erro ? null : result;
-  }
-
-  function getMessage(type) {
-    var messages = {
-      loading: 'Buscando informações para o CEP [CEP]...',
-      ok: 'Endereço referente ao CEP [CEP]:',
-      error: 'Não encontramos o endereço para o CEP [CEP].'
-    };
-    $status.get()[0].textContent = replaceCEP(messages[type]);
-    /*return { //outra forma de fazer
-      loading: 'Buscando informações para o CEP [CEP]...',
-      ok: 'Endereço referente ao CEP [CEP]:',
-      error: 'Não encontramos o endereço para o CEP [CEP].'
-    }[type];*/
-  }
-
-  function replaceCEP(message) {
-    return message.replace('[CEP]', clearCEP());
-  }
-})();
+})(window.DOM);
