@@ -63,7 +63,7 @@
         fillCEPFields();//função para preencher os dados da request
       }
 
-      if (isCepInvalid) {
+      if (isCepInvalid()) {
         getMessage('error');
       }
     }
