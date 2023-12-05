@@ -122,8 +122,17 @@
     function replaceCEP(message) {
       return message.replace('[CEP]', clearCEP());
     }
+
+    //exportar funções (revealing module pattern)
+    return {
+      getMessage: getMessage,
+      replaceCEP: replaceCEP
+    };
   }
 
-  app();
+  //para acessar direto os objtos, executa a função qdo exporta no window.app
+  window.app = app();
 
+  //window.app = app;
+  app();
 })(window.DOM);
