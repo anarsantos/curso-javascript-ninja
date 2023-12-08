@@ -55,8 +55,8 @@
         var data = JSON.parse(this.responseText);
         var $companyName = new DOM('[data-js="company-name"]');
         var $companyPhone = new DOM('[data-js="company-phone"]');
-        $companyName.get()[0].textContext = data.name;
-        $companyPhone.get()[0].textContext = data.phone;
+        $companyName.get()[0].textContent = data.name;
+        $companyPhone.get()[0].textContent = data.phone;
     },
 
     isReady: function isReady() {
